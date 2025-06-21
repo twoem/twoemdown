@@ -1,0 +1,27 @@
+services:
+  # Backend API Service
+  - type: web
+    name: twoem-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && python -m uvicorn server:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGO_URL
+        value: mongodb+srv://username:password@cluster.mongodb.net/twoem_db?retryWrites=true&w=majority
+      - key: DB_NAME
+        value: twoem_db
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    
+  # Frontend Static Site
+  - type: static
+    name: twoem-frontend
+    buildCommand: cd frontend && yarn install && yarn build
+    staticPublishPath: ./frontend/build
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://twoem-backend.onrender.com$request_uri
+    envVars:
+      - key: REACT_APP_BACKEND_URL
+        value: https://twoem-backend.onrender.com
