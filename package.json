@@ -1,7 +1,7 @@
 {
   "name": "twoem-online-productions",
   "version": "1.0.0",
-  "description": "TWOEM Online Productions - Document Management and Eulogy Services",
+  "description": "TWOEM ONLINE PRODUCTIONS- Document Management and Eulogy Services",
   "main": "index.js",
   "scripts": {
     "install-all": "cd frontend && yarn install && cd ../backend && pip install -r requirements.txt",
@@ -18,7 +18,7 @@
     "online-productions",
     "twoem"
   ],
-  "author": "TWOEM Online Productions",
+  "author": "TWOEM ONLINE PRODUCTIONS",
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0",
