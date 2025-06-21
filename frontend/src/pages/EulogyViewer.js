@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import Navigation from '../components/Navigation';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { ArrowLeft, Heart, Calendar, Loader } from 'lucide-react';
+import { ArrowLeft, Heart, Calendar, FileText, Download, AlertCircle } from 'lucide-react';
 import { mockEulogies } from '../mock/data';
 
 const EulogyViewer = () => {
@@ -23,7 +23,7 @@ const EulogyViewer = () => {
       const loadingMessages = [
         `Hello, eulogy for ${foundEulogy.deceased} is loading`,
         'Kindly wait...',
-        'Preparing memorial content...',
+        'Preparing memorial PDF...',
         'Almost ready...',
         'Loading complete'
       ];
@@ -101,7 +101,7 @@ const EulogyViewer = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-purple-50">
       <Navigation />
       
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Back Button */}
         <div className="mb-8">
           <Link to="/downloads">
@@ -138,22 +138,63 @@ const EulogyViewer = () => {
                 <p className="text-xl text-purple-600 font-semibold mb-2">
                   In loving memory of {eulogy.deceased}
                 </p>
-                <div className="flex items-center justify-center text-gray-500">
+                <div className="flex items-center justify-center text-gray-500 mb-4">
                   <Calendar className="w-4 h-4 mr-2" />
                   {formatDate(eulogy.dateOfService)}
+                </div>
+                <div className="flex items-center justify-center text-sm text-gray-500">
+                  <FileText className="w-4 h-4 mr-1" />
+                  PDF Document • {eulogy.size}
                 </div>
               </div>
             </div>
 
-            {/* Eulogy Text */}
-            <div className="prose prose-lg prose-purple max-w-none">
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 md:p-12 shadow-inner border border-purple-100">
-                <div className="text-gray-800 leading-relaxed space-y-6">
-                  {eulogy.content.split('\n\n').map((paragraph, index) => (
-                    <p key={index} className="text-lg leading-relaxed">
-                      {paragraph}
-                    </p>
-                  ))}
+            {/* PDF Viewer Container */}
+            <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 shadow-inner border border-purple-100">
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Memorial PDF Document</h3>
+                <p className="text-gray-600">{eulogy.description}</p>
+              </div>
+              
+              {/* PDF Display Area */}
+              <div className="bg-white rounded-xl shadow-lg border-2 border-dashed border-purple-200 min-h-[600px] flex flex-col items-center justify-center">
+                <div className="text-center p-8">
+                  <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <FileText className="w-10 h-10 text-purple-600" />
+                  </div>
+                  <h4 className="text-2xl font-bold text-gray-800 mb-4">
+                    Eulogy PDF Document
+                  </h4>
+                  <p className="text-gray-600 mb-6 max-w-md">
+                    This eulogy document is displayed in a fixed, non-downloadable format to preserve the sacred nature of the memorial content.
+                  </p>
+                  
+                  {/* Mock PDF Viewer */}
+                  <div className="bg-gray-100 rounded-lg p-8 max-w-2xl mx-auto shadow-inner">
+                    <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+                      <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-3 w-5/6"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-3 w-4/5"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                      <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-3 w-5/6"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-3"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-3 w-4/5"></div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                    <div className="flex items-center justify-center text-amber-700">
+                      <AlertCircle className="w-5 h-5 mr-2" />
+                      <span className="text-sm font-medium">
+                        This document is protected and non-downloadable as requested
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
