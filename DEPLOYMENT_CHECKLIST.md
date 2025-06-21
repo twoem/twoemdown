@@ -2,7 +2,11 @@
 
 ## 📋 Pre-Deployment Checklist
 
-### 🔧 Code Preparation
+### 🔧 Updated Environment Requirements:
+- **Node.js**: Updated to version 20+ (required for React Router DOM 6.26.1)
+- **Docker**: Updated to use `node:20-alpine` 
+- **Render.yaml**: Added Node.js 20 version specification
+- **Package.json**: Updated engine requirements
 - [x] All source code completed and tested
 - [x] Frontend builds without errors
 - [x] Backend starts without errors
