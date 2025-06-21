@@ -124,14 +124,18 @@ const Downloads = () => {
                 </CardHeader>
                 
                 <CardContent className="pt-0 relative z-10">
-                  <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    {eulogy.content.substring(0, 120)}...
+                  <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+                    {eulogy.description}
                   </p>
+                  <div className="flex items-center text-xs text-gray-500 mb-4">
+                    <FileText className="w-3 h-3 mr-1" />
+                    PDF • {eulogy.size}
+                  </div>
                   
                   <Link to={`/eulogy/${eulogy.id}`}>
                     <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform group-hover:scale-105">
                       <Eye className="w-4 h-4 mr-2" />
-                      View Eulogy
+                      View Eulogy PDF
                     </Button>
                   </Link>
                 </CardContent>
