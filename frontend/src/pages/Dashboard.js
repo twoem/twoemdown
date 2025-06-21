@@ -8,7 +8,7 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../components/ui/dialog';
 import { useToast } from '../hooks/use-toast';
-import { Plus, Upload, FileText, Heart, Trash2, Calendar, Eye, Users, BarChart3, Download } from 'lucide-react';
+import { Plus, Upload, FileText, Heart, Trash2, Calendar, Eye, Users, BarChart3, Download, AlertCircle } from 'lucide-react';
 import { mockDocuments, mockEulogies } from '../mock/data';
 
 const Dashboard = () => {
@@ -16,7 +16,6 @@ const Dashboard = () => {
   const [eulogies, setEulogies] = useState(mockEulogies);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isEulogyDialogOpen, setIsEulogyDialogOpen] = useState(false);
-  const [uploadType, setUploadType] = useState('document');
   const { toast } = useToast();
 
   // Form states
@@ -29,12 +28,26 @@ const Dashboard = () => {
     title: '',
     deceased: '',
     dateOfService: '',
-    content: ''
+    description: '',
+    file: null
   });
 
   useEffect(() => {
     document.title = 'TWOEM | DASHBOARD';
   }, []);
+
+  const validateFileSize = (file, maxSizeMB, fileType) => {
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      toast({
+        title: "File Too Large",
+        description: `${fileType} file size must not exceed ${maxSizeMB}MB. Current file: ${(file.size / (1024 * 1024)).toFixed(1)}MB`,
+        variant: "destructive"
+      });
+      return false;
+    }
+    return true;
+  };
 
   const handleDocumentUpload = (e) => {
     e.preventDefault();
@@ -45,6 +58,11 @@ const Dashboard = () => {
         description: "Please fill all fields and select a file",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Validate file size for documents (general limit)
+    if (!validateFileSize(documentForm.file, 10, "Document")) {
       return;
     }
 
@@ -67,15 +85,30 @@ const Dashboard = () => {
     });
   };
 
-  const handleEulogyCreate = (e) => {
+  const handleEulogyUpload = (e) => {
     e.preventDefault();
     
-    if (!eulogyForm.title || !eulogyForm.deceased || !eulogyForm.dateOfService || !eulogyForm.content) {
+    if (!eulogyForm.title || !eulogyForm.deceased || !eulogyForm.dateOfService || !eulogyForm.file) {
       toast({
         title: "Error",
-        description: "Please fill all fields",
+        description: "Please fill all fields and select a PDF file",
         variant: "destructive"
       });
+      return;
+    }
+
+    // Validate file type
+    if (eulogyForm.file.type !== 'application/pdf') {
+      toast({
+        title: "Invalid File Type",
+        description: "Eulogy must be a PDF file",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate file size (13MB limit for eulogies)
+    if (!validateFileSize(eulogyForm.file, 13, "Eulogy PDF")) {
       return;
     }
 
@@ -84,17 +117,19 @@ const Dashboard = () => {
       title: eulogyForm.title,
       deceased: eulogyForm.deceased,
       dateOfService: eulogyForm.dateOfService,
-      content: eulogyForm.content,
-      uploadDate: new Date().toISOString().split('T')[0]
+      description: eulogyForm.description || `Memorial service for ${eulogyForm.deceased}`,
+      fileUrl: URL.createObjectURL(eulogyForm.file),
+      uploadDate: new Date().toISOString().split('T')[0],
+      size: `${(eulogyForm.file.size / (1024 * 1024)).toFixed(1)} MB`
     };
 
     setEulogies([...eulogies, newEulogy]);
-    setEulogyForm({ title: '', deceased: '', dateOfService: '', content: '' });
+    setEulogyForm({ title: '', deceased: '', dateOfService: '', description: '', file: null });
     setIsEulogyDialogOpen(false);
     
     toast({
       title: "Success",
-      description: "Eulogy created successfully",
+      description: "Eulogy PDF uploaded successfully",
     });
   };
 
@@ -221,6 +256,7 @@ const Dashboard = () => {
                     onChange={(e) => setDocumentForm({...documentForm, file: e.target.files[0]})}
                     required
                   />
+                  <p className="text-sm text-gray-500 mt-1">Max size: 10MB</p>
                 </div>
                 <Button type="submit" className="w-full">
                   Upload Document
@@ -233,14 +269,14 @@ const Dashboard = () => {
             <DialogTrigger asChild>
               <Button className="bg-purple-600 hover:bg-purple-700 shadow-lg">
                 <Plus className="w-4 h-4 mr-2" />
-                Create Eulogy
+                Upload Eulogy PDF
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>Create New Eulogy</DialogTitle>
+                <DialogTitle>Upload New Eulogy PDF</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleEulogyCreate} className="space-y-4">
+              <form onSubmit={handleEulogyUpload} className="space-y-4">
                 <div>
                   <Label htmlFor="eulogy-title">Eulogy Title</Label>
                   <Input
@@ -272,18 +308,31 @@ const Dashboard = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="eulogy-content">Eulogy Content</Label>
+                  <Label htmlFor="eulogy-description">Brief Description (Optional)</Label>
                   <Textarea
-                    id="eulogy-content"
-                    value={eulogyForm.content}
-                    onChange={(e) => setEulogyForm({...eulogyForm, content: e.target.value})}
-                    placeholder="Write the full eulogy content here..."
-                    rows={10}
-                    required
+                    id="eulogy-description"
+                    value={eulogyForm.description}
+                    onChange={(e) => setEulogyForm({...eulogyForm, description: e.target.value})}
+                    placeholder="Brief description for preview..."
+                    rows={3}
                   />
                 </div>
+                <div>
+                  <Label htmlFor="eulogy-file">Select PDF File</Label>
+                  <Input
+                    id="eulogy-file"
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => setEulogyForm({...eulogyForm, file: e.target.files[0]})}
+                    required
+                  />
+                  <div className="flex items-center mt-2 text-sm text-amber-600">
+                    <AlertCircle className="w-4 h-4 mr-1" />
+                    <span>Max size: 13MB | PDF files only</span>
+                  </div>
+                </div>
                 <Button type="submit" className="w-full">
-                  Create Eulogy
+                  Upload Eulogy PDF
                 </Button>
               </form>
             </DialogContent>
@@ -343,7 +392,7 @@ const Dashboard = () => {
         <section>
           <div className="flex items-center mb-6">
             <Heart className="w-6 h-6 text-purple-600 mr-2" />
-            <h2 className="text-2xl font-bold text-gray-900">Eulogies</h2>
+            <h2 className="text-2xl font-bold text-gray-900">Eulogy PDFs</h2>
             <Badge className="ml-3 bg-purple-100 text-purple-700">{eulogies.length}</Badge>
           </div>
           
@@ -353,11 +402,9 @@ const Dashboard = () => {
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="secondary" className="bg-purple-100 text-purple-700">
-                      Memorial
+                      PDF Memorial
                     </Badge>
-                    <span className="text-sm text-gray-500">
-                      {formatDate(eulogy.dateOfService)}
-                    </span>
+                    <span className="text-sm text-gray-500">{eulogy.size}</span>
                   </div>
                   <CardTitle className="text-lg">{eulogy.title}</CardTitle>
                   <p className="text-sm text-purple-600 font-medium">
@@ -365,8 +412,12 @@ const Dashboard = () => {
                   </p>
                 </CardHeader>
                 <CardContent>
+                  <div className="flex items-center text-sm text-gray-500 mb-2">
+                    <Calendar className="w-4 h-4 mr-1" />
+                    {formatDate(eulogy.dateOfService)}
+                  </div>
                   <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    {eulogy.content.substring(0, 100)}...
+                    {eulogy.description}
                   </p>
                   <div className="flex space-x-2">
                     <Button
