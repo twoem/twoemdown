@@ -26,13 +26,10 @@ FROM node:18-alpine as frontend-build
 WORKDIR /app/frontend
 
 # Copy package files
-COPY frontend/package.json frontend/yarn.lock ./
+COPY frontend/package.json frontend/yarn.lock* ./
 
-# Temporarily downgrade react-router-dom for Node 18 compatibility
-RUN sed -i 's/"react-router-dom": ".*"/"react-router-dom": "^6.26.1"/' package.json
-
-# Install dependencies
-RUN yarn install --frozen-lockfile
+# Install dependencies (without frozen lockfile to handle version changes)
+RUN yarn install
 
 # Copy frontend source code
 COPY frontend/ .
