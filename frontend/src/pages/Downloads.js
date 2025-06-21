@@ -23,15 +23,15 @@ const Downloads = () => {
     });
   };
 
-  const handleDownload = (document) => {
+  const handleDownload = (doc) => {
     // Mock download functionality
     const link = document.createElement('a');
     link.href = '#';
-    link.download = document.title + '.pdf';
+    link.download = doc.title + '.pdf';
     link.click();
     
     // In real implementation, this would trigger actual file download
-    alert(`Downloading: ${document.title}`);
+    alert(`Downloading: ${doc.title}`);
   };
 
   return (
