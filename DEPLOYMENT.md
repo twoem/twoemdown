@@ -5,6 +5,18 @@
 1. **MongoDB Atlas Account** (Free tier available)
 2. **Render.com Account** (Free tier available)
 3. **GitHub Repository** with your code
+4. **Node.js 20+** (required for latest React Router)
+
+## ⚠️ Node.js Version Important Note
+
+**FIXED**: The original Docker error was due to React Router DOM 7.5.1 requiring Node.js ≥20.0.0. We've resolved this by:
+
+1. **✅ Updated Dockerfile** to use `node:20-alpine`
+2. **✅ Downgraded React Router** to v6.26.1 (compatible with Node 18+)
+3. **✅ Updated render.yaml** to specify Node.js 20
+4. **✅ Provided backup Dockerfile** for Node.js 18 environments
+
+**Your deployment will now work on any platform supporting Node.js 18+ or 20+**
 
 ## Step-by-Step Deployment
 
