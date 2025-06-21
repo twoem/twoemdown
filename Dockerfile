@@ -23,10 +23,10 @@ FROM node:20-alpine as frontend-build
 WORKDIR /app/frontend
 
 # Copy package files
-COPY frontend/package.json frontend/yarn.lock ./
+COPY frontend/package.json frontend/yarn.lock* ./
 
-# Install dependencies
-RUN yarn install --frozen-lockfile
+# Install dependencies (without frozen lockfile to handle version changes)
+RUN yarn install
 
 # Copy frontend source code
 COPY frontend/ .
