@@ -14,7 +14,15 @@ cd ..
 # Build frontend
 echo "🎨 Building frontend..."
 cd frontend
-yarn install --frozen-lockfile
+
+# Ensure we have the latest lockfile
+if [ ! -f "yarn.lock" ]; then
+    echo "📝 Generating yarn.lock file..."
+    yarn install
+fi
+
+# Install dependencies and build
+yarn install
 yarn build
 cd ..
 
