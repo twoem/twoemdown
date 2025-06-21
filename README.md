@@ -13,7 +13,7 @@ Professional document management and digital eulogy services platform.
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js 20+ 
 - Python 3.11+
 - MongoDB database
 
