@@ -15,16 +15,43 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
-mongo_url = os.environ['MONGO_URL']
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+db_name = os.environ.get('DB_NAME', 'twoem_db')
 client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+db = client[db_name]
 
 # Create the main app without a prefix
-app = FastAPI()
+app = FastAPI(
+    title="TWOEM Online Productions API",
+    description="Backend API for document management and eulogy services",
+    version="1.0.0"
+)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
+# CORS configuration for production
+origins = [
+    "http://localhost:3000",  # Local development
+    "http://localhost:3001",  # Local development alternative
+    "https://localhost:3000",  # Local HTTPS
+    # Add your production frontend URLs here
+    "https://twoem-frontend.onrender.com",
+    "https://twoem.onrender.com",
+]
+
+# Add environment-specific origins
+if os.environ.get('ALLOWED_ORIGINS'):
+    additional_origins = os.environ.get('ALLOWED_ORIGINS').split(',')
+    origins.extend([origin.strip() for origin in additional_origins])
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Define Models
 class StatusCheck(BaseModel):
@@ -38,7 +65,29 @@ class StatusCheckCreate(BaseModel):
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {
+        "message": "TWOEM Online Productions API",
+        "version": "1.0.0",
+        "status": "running"
+    }
+
+@api_router.get("/health")
+async def health_check():
+    try:
+        # Test database connection
+        await db.list_collection_names()
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "timestamp": datetime.utcnow()
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e),
+            "timestamp": datetime.utcnow()
+        }
 
 @api_router.post("/status", response_model=StatusCheck)
 async def create_status_check(input: StatusCheckCreate):
@@ -55,21 +104,35 @@ async def get_status_checks():
 # Include the router in the main app
 app.include_router(api_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 # Configure logging
+log_level = os.environ.get('LOG_LEVEL', 'INFO').upper()
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, log_level),
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_db_client():
+    logger.info("Starting TWOEM Online Productions API...")
+    try:
+        # Test database connection
+        await db.list_collection_names()
+        logger.info("Database connection established successfully")
+    except Exception as e:
+        logger.error(f"Database connection failed: {e}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    logger.info("Shutting down TWOEM Online Productions API...")
     client.close()
+
+# Root endpoint for health check
+@app.get("/")
+async def read_root():
+    return {
+        "message": "TWOEM Online Productions API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/api/health"
+    }
