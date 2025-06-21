@@ -1,0 +1,30 @@
+{
+  "name": "twoem-online-productions",
+  "version": "1.0.0",
+  "description": "TWOEM Online Productions - Document Management and Eulogy Services",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "cd frontend && yarn install && cd ../backend && pip install -r requirements.txt",
+    "build": "cd frontend && yarn build",
+    "start": "cd backend && python -m uvicorn server:app --host 0.0.0.0 --port 8000",
+    "dev": "concurrently \"cd backend && python -m uvicorn server:app --reload --host 0.0.0.0 --port 8001\" \"cd frontend && yarn start\"",
+    "build-frontend": "cd frontend && yarn install && yarn build",
+    "build-backend": "cd backend && pip install -r requirements.txt",
+    "deploy": "chmod +x build.sh && ./build.sh"
+  },
+  "keywords": [
+    "document-management",
+    "eulogy-services",
+    "online-productions",
+    "twoem"
+  ],
+  "author": "TWOEM Online Productions",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.11.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
